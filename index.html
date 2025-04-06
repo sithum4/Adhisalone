@@ -1,0 +1,1667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ADHI Salon | Luxury Beauty Experience</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+  <script src="https://unpkg.com/split-type"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/ScrollTrigger.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #ff4d6d;
+      --secondary: #ff8fa3;
+      --dark: #0f172a;
+      --light: #f8fafc;
+    }
+    
+    @font-face {
+      font-family: 'Montserrat';
+      src: url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
+    }
+    
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background-color: var(--dark);
+      color: var(--light);
+      overflow-x: hidden;
+    }
+    
+    .text-gradient {
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    
+    .bg-glass {
+      background: rgba(15, 23, 42, 0.7);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .hero-clip {
+      clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
+    }
+    
+    .service-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 20px 25px -5px rgba(255, 77, 109, 0.1), 0 10px 10px -5px rgba(255, 77, 109, 0.04);
+    }
+    
+    .animate-float {
+      animation: float 6s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-20px); }
+      100% { transform: translateY(0px); }
+    }
+    
+    .animate-float-delay {
+      animation: float 6s ease-in-out infinite 1s;
+    }
+    
+    .scroll-down {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 30px;
+      height: 50px;
+      border: 2px solid var(--light);
+      border-radius: 50px;
+    }
+    
+    .scroll-down::before {
+      content: '';
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      width: 6px;
+      height: 6px;
+      background: var(--light);
+      margin-left: -3px;
+      border-radius: 100%;
+      animation: scrollDown 2s infinite;
+    }
+    
+    @keyframes scrollDown {
+      0% { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0; transform: translateY(20px); }
+    }
+    
+    .marquee {
+      animation: marquee 20s linear infinite;
+    }
+    
+    @keyframes marquee {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    
+    .text-stroke {
+      -webkit-text-stroke: 1px var(--light);
+      color: transparent;
+    }
+    
+    #threejs-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      opacity: 0.3;
+    }
+    
+    .team-card:hover .team-overlay {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    .team-overlay {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s ease;
+    }
+    
+    .accordion-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out;
+    }
+    
+    .accordion.active .accordion-content {
+      max-height: 500px;
+    }
+    
+    .booking-form input,
+    .booking-form textarea,
+    .booking-form select {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.3s ease;
+    }
+    
+    .booking-form input:focus,
+    .booking-form textarea:focus,
+    .booking-form select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(255, 77, 109, 0.3);
+    }
+    
+    .testimonial-card {
+      background: linear-gradient(145deg, rgba(15, 23, 42, 0.8), rgba(30, 41, 59, 0.8));
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+    
+    .testimonial-card::before {
+      content: """ADHI Salon""";
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      font-size: 60px;
+      color: var(--primary);
+      opacity: 0.2;
+      font-family: serif;
+    }
+    
+    .parallax-bg {
+      background-attachment: fixed;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: cover;
+    }
+    
+    .cursor-follower {
+      position: fixed;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255, 77, 109, 0.3);
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      z-index: 9999;
+      mix-blend-mode: screen;
+      transition: transform 0.1s ease;
+    }
+  </style>
+</head>
+<body class="relative overflow-x-hidden">
+  <!-- Three.js Background -->
+  <div id="threejs-bg"></div>
+  
+  <!-- Cursor Follower -->
+  <div class="cursor-follower"></div>
+  
+  <!-- Preloader -->
+  <div id="preloader" class="fixed inset-0 bg-dark z-50 flex items-center justify-center">
+    <div class="relative w-24 h-24">
+      <div class="absolute inset-0 border-4 border-t-primary border-r-secondary border-b-primary border-l-secondary rounded-full animate-spin"></div>
+      <div class="absolute inset-4 border-4 border-t-secondary border-r-primary border-b-secondary border-l-primary rounded-full animate-spin-reverse"></div>
+    </div>
+  </div>
+  
+  <!-- Floating Particles (p5.js) -->
+  <div id="p5-particles" class="fixed inset-0 pointer-events-none z-0"></div>
+  
+  <!-- Navigation -->
+  <nav class="fixed w-full z-50 transition-all duration-500" id="main-nav">
+    <div class="container mx-auto px-6 py-4">
+      <div class="flex justify-between items-center">
+        <a href="#" class="text-2xl font-bold text-gradient">ADHI</a>
+        
+        <!-- Desktop Menu -->
+        <div class="hidden md:flex space-x-8">
+          <a href="#home" class="nav-link relative group text-white hover:text-primary transition-colors">
+            Home
+            <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+          </a>
+          <a href="#about" class="nav-link relative group text-white hover:text-primary transition-colors">
+            About
+            <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+          </a>
+          <a href="#services" class="nav-link relative group text-white hover:text-primary transition-colors">
+            Services
+            <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+          </a>
+          <a href="#gallery" class="nav-link relative group text-white hover:text-primary transition-colors">
+            Gallery
+            <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+          </a>
+          <a href="#team" class="nav-link relative group text-white hover:text-primary transition-colors">
+            Team
+            <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+          </a>
+          <a href="#testimonials" class="nav-link relative group text-white hover:text-primary transition-colors">
+            Testimonials
+            <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+          </a>
+          <a href="#contact" class="nav-link relative group text-white hover:text-primary transition-colors">
+            Contact
+            <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+          </a>
+        </div>
+        
+        <!-- Mobile Menu Button -->
+        <button id="mobile-menu-button" class="md:hidden text-white focus:outline-none">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="hidden md:hidden bg-dark bg-opacity-95 absolute w-full px-6 py-4">
+      <div class="flex flex-col space-y-4">
+        <a href="#home" class="nav-link text-white hover:text-primary transition-colors">Home</a>
+        <a href="#about" class="nav-link text-white hover:text-primary transition-colors">About</a>
+        <a href="#services" class="nav-link text-white hover:text-primary transition-colors">Services</a>
+        <a href="#gallery" class="nav-link text-white hover:text-primary transition-colors">Gallery</a>
+        <a href="#team" class="nav-link text-white hover:text-primary transition-colors">Team</a>
+        <a href="#testimonials" class="nav-link text-white hover:text-primary transition-colors">Testimonials</a>
+        <a href="#contact" class="nav-link text-white hover:text-primary transition-colors">Contact</a>
+      </div>
+    </div>
+  </nav>
+  
+  <!-- Hero Section -->
+  <section id="home" class="relative min-h-screen flex items-center justify-center hero-clip overflow-hidden pt-20">
+    <div class="absolute inset-0 bg-gradient-to-br from-dark to-primary opacity-50"></div>
+    <div class="container mx-auto px-6 z-10">
+      <div class="flex flex-col md:flex-row items-center">
+        <div class="md:w-1/2 mb-10 md:mb-0">
+          <h1 class="text-5xl md:text-7xl font-bold mb-6 leading-tight">
+            <span class="text-gradient">Redefine</span> Your Beauty
+          </h1>
+          <p class="text-xl md:text-2xl mb-8 text-gray-300">
+            Experience luxury hair, skin, and beauty treatments tailored to your unique style at ADHI Salon.
+          </p>
+          <div class="flex flex-wrap gap-4">
+            <a href="#booking" class="bg-primary hover:bg-primary-dark text-white px-8 py-3 rounded-full font-medium transition-all transform hover:scale-105 shadow-lg">
+              Book Now
+            </a>
+            <a href="#services" class="border-2 border-white hover:border-primary text-white hover:text-primary px-8 py-3 rounded-full font-medium transition-all transform hover:scale-105">
+              Our Services
+            </a>
+          </div>
+        </div>
+        <div class="md:w-1/2 relative">
+          <div class="relative w-full max-w-md mx-auto">
+            <div class="absolute -top-10 -left-10 w-32 h-32 bg-primary rounded-full opacity-20 animate-float"></div>
+            <div class="absolute -bottom-10 -right-10 w-40 h-40 bg-secondary rounded-full opacity-20 animate-float-delay"></div>
+            <div class="relative bg-glass p-8 rounded-2xl backdrop-blur-lg border border-white border-opacity-10">
+              <h3 class="text-2xl font-bold mb-4 text-white">Quick Booking</h3>
+              <form class="space-y-4">
+                <div>
+                  <label class="block text-gray-300 mb-2">Service</label>
+                  <select class="w-full px-4 py-3 rounded-lg bg-dark bg-opacity-50 border border-gray-700 focus:border-primary focus:outline-none">
+                    <option>Select a service</option>
+                    <option>Haircut & Styling</option>
+                    <option>Hair Coloring</option>
+                    <option>Keratin Treatment</option>
+                    <option>Bridal Makeup</option>
+                    <option>Facial Treatment</option>
+                    <option>Manicure & Pedicure</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-gray-300 mb-2">Date</label>
+                  <input type="date" class="w-full px-4 py-3 rounded-lg bg-dark bg-opacity-50 border border-gray-700 focus:border-primary focus:outline-none">
+                </div>
+                <button type="submit" class="w-full bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-lg font-medium transition-all">
+                  Check Availability
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="scroll-down"></div>
+    
+    <!-- Animated Marquee -->
+    <div class="absolute bottom-0 left-0 w-full bg-primary py-4 overflow-hidden">
+      <div class="marquee whitespace-nowrap">
+        <span class="text-xl font-bold mx-8">✨ Premium Hair Treatments ✨</span>
+        <span class="text-xl font-bold mx-8">💆‍♀️ Luxury Spa Services 💆‍♀️</span>
+        <span class="text-xl font-bold mx-8">💅 Expert Nail Care 💅</span>
+        <span class="text-xl font-bold mx-8">👰 Bridal Packages 👰</span>
+        <span class="text-xl font-bold mx-8">✨ Premium Hair Treatments ✨</span>
+        <span class="text-xl font-bold mx-8">💆‍♀️ Luxury Spa Services 💆‍♀️</span>
+        <span class="text-xl font-bold mx-8">💅 Expert Nail Care 💅</span>
+        <span class="text-xl font-bold mx-8">👰 Bridal Packages 👰</span>
+      </div>
+    </div>
+  </section>
+  
+  <!-- About Section -->
+  <section id="about" class="py-20 bg-dark">
+    <div class="container mx-auto px-6">
+      <div class="text-center mb-16">
+        <span class="text-primary font-semibold">OUR STORY</span>
+        <h2 class="text-4xl md:text-5xl font-bold mt-2 mb-4">Crafting Beauty Since 2010</h2>
+        <div class="w-20 h-1 bg-primary mx-auto"></div>
+      </div>
+      
+      <div class="flex flex-col md:flex-row items-center gap-12">
+        <div class="md:w-1/2 relative">
+          <div class="grid grid-cols-2 gap-4">
+            <div class="bg-gray-800 rounded-xl h-64 flex items-center justify-center p-6 border border-gray-700 transform transition-all hover:scale-95">
+              <div class="text-center">
+                <div class="text-4xl text-primary mb-2">10+</div>
+                <div class="text-gray-300">Years Experience</div>
+              </div>
+            </div>
+            <div class="bg-gray-800 rounded-xl h-64 flex items-center justify-center p-6 border border-gray-700 transform transition-all hover:scale-95">
+              <div class="text-center">
+                <div class="text-4xl text-primary mb-2">5K+</div>
+                <div class="text-gray-300">Happy Clients</div>
+              </div>
+            </div>
+            <div class="bg-gray-800 rounded-xl h-64 flex items-center justify-center p-6 border border-gray-700 transform transition-all hover:scale-95">
+              <div class="text-center">
+                <div class="text-4xl text-primary mb-2">15+</div>
+                <div class="text-gray-300">Expert Stylists</div>
+              </div>
+            </div>
+            <div class="bg-gray-800 rounded-xl h-64 flex items-center justify-center p-6 border border-gray-700 transform transition-all hover:scale-95">
+              <div class="text-center">
+                <div class="text-4xl text-primary mb-2">50+</div>
+                <div class="text-gray-300">Awards Won</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="md:w-1/2">
+          <h3 class="text-3xl font-bold mb-6">Where Beauty Meets Elegance</h3>
+          <p class="text-gray-400 mb-6 leading-relaxed">
+            ADHI Salon was founded with a vision to create a sanctuary where clients could experience transformative beauty treatments in a luxurious, welcoming environment. Our journey began in a small studio and has grown into Colombo's premier beauty destination.
+          </p>
+          <p class="text-gray-400 mb-8 leading-relaxed">
+            We combine cutting-edge techniques with time-honored traditions, using only the finest products from around the world. Our team of internationally trained stylists and therapists are dedicated to helping you look and feel your absolute best.
+          </p>
+          <div class="flex flex-wrap gap-4">
+            <div class="flex items-center">
+              <div class="w-10 h-10 bg-primary bg-opacity-20 rounded-full flex items-center justify-center mr-3">
+                <i class="fas fa-check text-primary"></i>
+              </div>
+              <span>Certified Professionals</span>
+            </div>
+            <div class="flex items-center">
+              <div class="w-10 h-10 bg-primary bg-opacity-20 rounded-full flex items-center justify-center mr-3">
+                <i class="fas fa-check text-primary"></i>
+              </div>
+              <span>Premium Products</span>
+            </div>
+            <div class="flex items-center">
+              <div class="w-10 h-10 bg-primary bg-opacity-20 rounded-full flex items-center justify-center mr-3">
+                <i class="fas fa-check text-primary"></i>
+              </div>
+              <span>Hygienic Environment</span>
+            </div>
+            <div class="flex items-center">
+              <div class="w-10 h-10 bg-primary bg-opacity-20 rounded-full flex items-center justify-center mr-3">
+                <i class="fas fa-check text-primary"></i>
+              </div>
+              <span>Personalized Service</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Services Section -->
+  <section id="services" class="py-20 bg-gray-900">
+    <div class="container mx-auto px-6">
+      <div class="text-center mb-16">
+        <span class="text-primary font-semibold">WHAT WE OFFER</span>
+        <h2 class="text-4xl md:text-5xl font-bold mt-2 mb-4">Our Premium Services</h2>
+        <p class="text-xl text-gray-400 max-w-2xl mx-auto">Experience the finest beauty treatments tailored to your unique needs and style.</p>
+        <div class="w-20 h-1 bg-primary mx-auto mt-6"></div>
+      </div>
+      
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <!-- Service Card 1 -->
+        <div class="service-card bg-gray-800 rounded-xl p-8 border border-gray-700 transition-all duration-300 hover:border-primary">
+          <div class="w-16 h-16 bg-primary bg-opacity-20 rounded-lg flex items-center justify-center mb-6">
+            <i class="fas fa-cut text-2xl text-primary"></i>
+          </div>
+          <h3 class="text-2xl font-bold mb-3">Hair Styling</h3>
+          <p class="text-gray-400 mb-4">Expert cuts, styling, and treatments to bring out the best in your hair.</p>
+          <ul class="space-y-2 mb-6">
+            <li class="flex items-center">
+              <i class="fas fa-check text-primary mr-2"></i>
+              <span>Precision Haircuts</span>
+            </li>
+            <li class="flex items-center">
+              <i class="fas fa-check text-primary mr-2"></i>
+              <span>Blowouts & Styling</span>
+            </li>
+            <li class="flex items-center">
+              <i class="fas fa-check text-primary mr-2"></i>
+              <span>Extensions</span>
+            </li>
+          </ul>
+          <a href="#" class="text-primary font-medium inline-flex items-center">
+            Learn More <i class="fas fa-arrow-right ml-2"></i>
+          </a>
+        </div>
+        
+        <!-- Service Card 2 -->
+        <div class="service-card bg-gray-800 rounded-xl p-8 border border-gray-700 transition-all duration-300 hover:border-primary">
+          <div class="w-16 h-16 bg-primary bg-opacity-20 rounded-lg flex items-center justify-center mb-6">
+            <i class="fas fa-palette text-2xl text-primary"></i>
+          </div>
+          <h3 class="text-2xl font-bold mb-3">Hair Coloring</h3>
+          <p class="text-gray-400 mb-4">Transform your look with our expert coloring and highlighting services.</p>
+          <ul class="space-y-2 mb-6">
+            <li class="flex items-center">
+              <i class="fas fa-check text-primary mr-2"></i>
+              <span>Balayage & Ombre</span>
+            </li>
+            <li class="flex items-center">
+              <i class="fas fa-check text-primary mr-2"></i>
+              <span>Root Touch-Ups</span>
+            </li>
+            <li class="flex items-center">
+              <i class="fas fa-check text-primary mr-2"></i>
+              <span>Color Correction</span>
+            </li>
+          </ul>
+          <a href="#" class="text-primary font-medium inline-flex items-center">
+            Learn More <i class="fas fa-arrow-right ml-2"></i>
+          </a>
+        </div>
+        
+        <!-- Service Card 3 -->
+        <div class="service-card bg-gray-800 rounded-xl p-8 border border-gray-700 transition-all duration-300 hover:border-primary">
+          <div class="w-16 h-16 bg-primary bg-opacity-20 rounded-lg flex items-center justify-center mb-6">
+            <i class="fas fa-spa text-2xl text-primary"></i>
+          </div>
+          <h3 class="text-2xl font-bold mb-3">Skin Treatments</h3>
+          <p class="text-gray-400 mb-4">Rejuvenate your skin with our luxurious facials and advanced treatments.</p>
+          <ul class="space-y-2 mb-6">
+            <li class="flex items-center">
+              <i class="fas fa-check text-primary mr-2"></i>
+              <span>Hydrating Facials</span>
+            </li>
+            <li class="flex items-center">
+              <i class="fas fa-check text-primary mr-2"></i>
+              <span>Anti-Aging Treatments</span>
+            </li>
+            <li class="flex items-center">
+              <i class="fas fa-check text-primary mr-2"></i>
+              <span>Acne Solutions</span>
+            </li>
+          </ul>
+          <a href="#" class="text-primary font-medium inline-flex items-center">
+            Learn More <i class="fas fa-arrow-right ml-2"></i>
+          </a>
+        </div>
+        
+        <!-- Service Card 4 -->
+        <div class="service-card bg-gray-800 rounded-xl p-8 border border-gray-700 transition-all duration-300 hover:border-primary">
+          <div class="w-16 h-16 bg-primary bg-opacity-20 rounded-lg flex items-center justify-center mb-6">
+            <i class="fas fa-eye text-2xl text-primary"></i>
+          </div>
+          <h3 class="text-2xl font-bold mb-3">Bridal Makeup</h3>
+          <p class="text-gray-400 mb-4">Flawless bridal looks crafted to enhance your natural beauty.</p>
+          <ul class="space-y-2 mb-6">
+            <li class="flex items-center">
+              <i class="fas fa-check text-primary mr-2"></i>
+              <span>Trial Sessions</span>
+            </li>
+            <li class="flex items-center">
+              <i class="fas fa-check text-primary mr-2"></i>
+              <span>Traditional & Modern Styles</span>
+            </li>
+            <li class="flex items-center">
+              <i class="fas fa-check text-primary mr-2"></i>
+              <span>On-Location Services</span>
+            </li>
+          </ul>
+          <a href="#" class="text-primary font-medium inline-flex items-center">
+            Learn More <i class="fas fa-arrow-right ml-2"></i>
+          </a>
+        </div>
+        
+        <!-- Service Card 5 -->
+        <div class="service-card bg-gray-800 rounded-xl p-8 border border-gray-700 transition-all duration-300 hover:border-primary">
+          <div class="w-16 h-16 bg-primary bg-opacity-20 rounded-lg flex items-center justify-center mb-6">
+            <i class="fas fa-hand-sparkles text-2xl text-primary"></i>
+          </div>
+          <h3 class="text-2xl font-bold mb-3">Nail Care</h3>
+          <p class="text-gray-400 mb-4">Pamper your hands and feet with our luxurious nail services.</p>
+          <ul class="space-y-2 mb-6">
+            <li class="flex items-center">
+              <i class="fas fa-check text-primary mr-2"></i>
+              <span>Gel Manicures</span>
+            </li>
+            <li class="flex items-center">
+              <i class="fas fa-check text-primary mr-2"></i>
+              <span>Acrylic Extensions</span>
+            </li>
+            <li class="flex items-center">
+              <i class="fas fa-check text-primary mr-2"></i>
+              <span>Spa Pedicures</span>
+            </li>
+          </ul>
+          <a href="#" class="text-primary font-medium inline-flex items-center">
+            Learn More <i class="fas fa-arrow-right ml-2"></i>
+          </a>
+        </div>
+        
+        <!-- Service Card 6 -->
+        <div class="service-card bg-gray-800 rounded-xl p-8 border border-gray-700 transition-all duration-300 hover:border-primary">
+          <div class="w-16 h-16 bg-primary bg-opacity-20 rounded-lg flex items-center justify-center mb-6">
+            <i class="fas fa-fire text-2xl text-primary"></i>
+          </div>
+          <h3 class="text-2xl font-bold mb-3">Hair Treatments</h3>
+          <p class="text-gray-400 mb-4">Revitalize and repair your hair with our intensive treatments.</p>
+          <ul class="space-y-2 mb-6">
+            <li class="flex items-center">
+              <i class="fas fa-check text-primary mr-2"></i>
+              <span>Keratin Smoothing</span>
+            </li>
+            <li class="flex items-center">
+              <i class="fas fa-check text-primary mr-2"></i>
+              <span>Scalp Therapies</span>
+            </li>
+            <li class="flex items-center">
+              <i class="fas fa-check text-primary mr-2"></i>
+              <span>Deep Conditioning</span>
+            </li>
+          </ul>
+          <a href="#" class="text-primary font-medium inline-flex items-center">
+            Learn More <i class="fas fa-arrow-right ml-2"></i>
+          </a>
+        </div>
+      </div>
+      
+      <div class="text-center mt-16">
+        <a href="#booking" class="inline-block bg-primary hover:bg-primary-dark text-white px-8 py-4 rounded-full font-medium transition-all transform hover:scale-105 shadow-lg">
+          View All Services & Pricing
+        </a>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Gallery Section -->
+  <section id="gallery" class="py-20 bg-dark">
+    <div class="container mx-auto px-6">
+      <div class="text-center mb-16">
+        <span class="text-primary font-semibold">OUR WORK</span>
+        <h2 class="text-4xl md:text-5xl font-bold mt-2 mb-4">Transformation Gallery</h2>
+        <p class="text-xl text-gray-400 max-w-2xl mx-auto">Browse through our collection of stunning makeovers and styles.</p>
+        <div class="w-20 h-1 bg-primary mx-auto mt-6"></div>
+      </div>
+      
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <!-- Gallery Item 1 -->
+        <div class="gallery-item relative group overflow-hidden rounded-xl">
+          <div class="aspect-w-1 aspect-h-1 bg-gray-800 rounded-xl flex items-center justify-center h-64">
+            <span class="text-gray-500">Before & After</span>
+          </div>
+          <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-6">
+            <div class="transform translate-y-4 group-hover:translate-y-0 transition-transform">
+              <h3 class="text-white font-bold text-lg">Hair Makeover</h3>
+              <p class="text-gray-300">Color Correction & Styling</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Gallery Item 2 -->
+        <div class="gallery-item relative group overflow-hidden rounded-xl">
+          <div class="aspect-w-1 aspect-h-1 bg-gray-800 rounded-xl flex items-center justify-center h-64">
+            <span class="text-gray-500">Bridal Look</span>
+          </div>
+          <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-6">
+            <div class="transform translate-y-4 group-hover:translate-y-0 transition-transform">
+              <h3 class="text-white font-bold text-lg">Traditional Bride</h3>
+              <p class="text-gray-300">Hair & Makeup</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Gallery Item 3 -->
+        <div class="gallery-item relative group overflow-hidden rounded-xl">
+          <div class="aspect-w-1 aspect-h-1 bg-gray-800 rounded-xl flex items-center justify-center h-64">
+            <span class="text-gray-500">Haircut</span>
+          </div>
+          <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-6">
+            <div class="transform translate-y-4 group-hover:translate-y-0 transition-transform">
+              <h3 class="text-white font-bold text-lg">Pixie Cut</h3>
+              <p class="text-gray-300">Precision Cutting</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Gallery Item 4 -->
+        <div class="gallery-item relative group overflow-hidden rounded-xl">
+          <div class="aspect-w-1 aspect-h-1 bg-gray-800 rounded-xl flex items-center justify-center h-64">
+            <span class="text-gray-500">Nail Art</span>
+          </div>
+          <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-6">
+            <div class="transform translate-y-4 group-hover:translate-y-0 transition-transform">
+              <h3 class="text-white font-bold text-lg">Gel Nails</h3>
+              <p class="text-gray-300">Custom Design</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Gallery Item 5 -->
+        <div class="gallery-item relative group overflow-hidden rounded-xl">
+          <div class="aspect-w-1 aspect-h-1 bg-gray-800 rounded-xl flex items-center justify-center h-64">
+            <span class="text-gray-500">Makeup</span>
+          </div>
+          <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-6">
+            <div class="transform translate-y-4 group-hover:translate-y-0 transition-transform">
+              <h3 class="text-white font-bold text-lg">Evening Glam</h3>
+              <p class="text-gray-300">Full Face Makeup</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Gallery Item 6 -->
+        <div class="gallery-item relative group overflow-hidden rounded-xl">
+          <div class="aspect-w-1 aspect-h-1 bg-gray-800 rounded-xl flex items-center justify-center h-64">
+            <span class="text-gray-500">Hair Color</span>
+          </div>
+          <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-6">
+            <div class="transform translate-y-4 group-hover:translate-y-0 transition-transform">
+              <h3 class="text-white font-bold text-lg">Balayage</h3>
+              <p class="text-gray-300">Sun-Kissed Highlights</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Gallery Item 7 -->
+        <div class="gallery-item relative group overflow-hidden rounded-xl">
+          <div class="aspect-w-1 aspect-h-1 bg-gray-800 rounded-xl flex items-center justify-center h-64">
+            <span class="text-gray-500">Facial</span>
+          </div>
+          <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-6">
+            <div class="transform translate-y-4 group-hover:translate-y-0 transition-transform">
+              <h3 class="text-white font-bold text-lg">Gold Facial</h3>
+              <p class="text-gray-300">Luxury Treatment</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Gallery Item 8 -->
+        <div class="gallery-item relative group overflow-hidden rounded-xl">
+          <div class="aspect-w-1 aspect-h-1 bg-gray-800 rounded-xl flex items-center justify-center h-64">
+            <span class="text-gray-500">Hair Treatment</span>
+          </div>
+          <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-6">
+            <div class="transform translate-y-4 group-hover:translate-y-0 transition-transform">
+              <h3 class="text-white font-bold text-lg">Keratin Smoothing</h3>
+              <p class="text-gray-300">Frizz Control</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="text-center mt-16">
+        <a href="#" class="inline-block border-2 border-primary text-primary hover:bg-primary hover:text-white px-8 py-3 rounded-full font-medium transition-all">
+          View More Transformations
+        </a>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Team Section -->
+  <section id="team" class="py-20 bg-gray-900">
+    <div class="container mx-auto px-6">
+      <div class="text-center mb-16">
+        <span class="text-primary font-semibold">MEET US</span>
+        <h2 class="text-4xl md:text-5xl font-bold mt-2 mb-4">Our Expert Team</h2>
+        <p class="text-xl text-gray-400 max-w-2xl mx-auto">Highly skilled professionals dedicated to your beauty experience.</p>
+        <div class="w-20 h-1 bg-primary mx-auto mt-6"></div>
+      </div>
+      
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <!-- Team Member 1 -->
+        <div class="team-card relative rounded-xl overflow-hidden">
+          <div class="aspect-w-1 aspect-h-1 bg-gray-800 rounded-xl flex items-center justify-center h-96">
+            <span class="text-gray-500">Stylist Photo</span>
+          </div>
+          <div class="team-overlay absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent p-6 flex items-end">
+            <div>
+              <h3 class="text-2xl font-bold text-white">Nirosha</h3>
+              <p class="text-primary mb-2">Senior Stylist</p>
+              <p class="text-gray-300 text-sm">10+ years experience in precision cutting and coloring.</p>
+              <div class="flex mt-4 space-x-3">
+                <a href="#" class="text-white hover:text-primary transition-colors">
+                  <i class="fab fa-instagram"></i>
+                </a>
+                <a href="#" class="text-white hover:text-primary transition-colors">
+                  <i class="fab fa-facebook-f"></i>
+                </a>
+                <a href="#" class="text-white hover:text-primary transition-colors">
+                  <i class="fab fa-twitter"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Team Member 2 -->
+        <div class="team-card relative rounded-xl overflow-hidden">
+          <div class="aspect-w-1 aspect-h-1 bg-gray-800 rounded-xl flex items-center justify-center h-96">
+            <span class="text-gray-500">Specialist Photo</span>
+          </div>
+          <div class="team-overlay absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent p-6 flex items-end">
+            <div>
+              <h3 class="text-2xl font-bold text-white">Dilani</h3>
+              <p class="text-primary mb-2">Skin Specialist</p>
+              <p class="text-gray-300 text-sm">Certified in advanced dermatological treatments.</p>
+              <div class="flex mt-4 space-x-3">
+                <a href="#" class="text-white hover:text-primary transition-colors">
+                  <i class="fab fa-instagram"></i>
+                </a>
+                <a href="#" class="text-white hover:text-primary transition-colors">
+                  <i class="fab fa-facebook-f"></i>
+                </a>
+                <a href="#" class="text-white hover:text-primary transition-colors">
+                  <i class="fab fa-twitter"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Team Member 3 -->
+        <div class="team-card relative rounded-xl overflow-hidden">
+          <div class="aspect-w-1 aspect-h-1 bg-gray-800 rounded-xl flex items-center justify-center h-96">
+            <span class="text-gray-500">Artist Photo</span>
+          </div>
+          <div class="team-overlay absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent p-6 flex items-end">
+            <div>
+              <h3 class="text-2xl font-bold text-white">Kasuni</h3>
+              <p class="text-primary mb-2">Makeup Artist</p>
+              <p class="text-gray-300 text-sm">Specializes in bridal and editorial makeup.</p>
+              <div class="flex mt-4 space-x-3">
+                <a href="#" class="text-white hover:text-primary transition-colors">
+                  <i class="fab fa-instagram"></i>
+                </a>
+                <a href="#" class="text-white hover:text-primary transition-colors">
+                  <i class="fab fa-facebook-f"></i>
+                </a>
+                <a href="#" class="text-white hover:text-primary transition-colors">
+                  <i class="fab fa-twitter"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Team Member 4 -->
+        <div class="team-card relative rounded-xl overflow-hidden">
+          <div class="aspect-w-1 aspect-h-1 bg-gray-800 rounded-xl flex items-center justify-center h-96">
+            <span class="text-gray-500">Technician Photo</span>
+          </div>
+          <div class="team-overlay absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent p-6 flex items-end">
+            <div>
+              <h3 class="text-2xl font-bold text-white">Ruvini</h3>
+              <p class="text-primary mb-2">Nail Technician</p>
+              <p class="text-gray-300 text-sm">Expert in nail art and therapeutic treatments.</p>
+              <div class="flex mt-4 space-x-3">
+                <a href="#" class="text-white hover:text-primary transition-colors">
+                  <i class="fab fa-instagram"></i>
+                </a>
+                <a href="#" class="text-white hover:text-primary transition-colors">
+                  <i class="fab fa-facebook-f"></i>
+                </a>
+                <a href="#" class="text-white hover:text-primary transition-colors">
+                  <i class="fab fa-twitter"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="text-center mt-16">
+        <a href="#booking" class="inline-block bg-primary hover:bg-primary-dark text-white px-8 py-4 rounded-full font-medium transition-all transform hover:scale-105 shadow-lg">
+          Book With Our Experts
+        </a>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Testimonials Section -->
+  <section id="testimonials" class="py-20 bg-dark">
+    <div class="container mx-auto px-6">
+      <div class="text-center mb-16">
+        <span class="text-primary font-semibold">CLIENT LOVE</span>
+        <h2 class="text-4xl md:text-5xl font-bold mt-2 mb-4">What Our Clients Say</h2>
+        <p class="text-xl text-gray-400 max-w-2xl mx-auto">Hear from our satisfied clients about their ADHI Salon experience.</p>
+        <div class="w-20 h-1 bg-primary mx-auto mt-6"></div>
+      </div>
+      
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <!-- Testimonial 1 -->
+        <div class="testimonial-card relative rounded-xl p-8">
+          <div class="flex items-center mb-6">
+            <div class="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mr-4">
+              <span class="text-gray-400">JP</span>
+            </div>
+            <div>
+              <h4 class="text-lg font-bold">Janani Perera</h4>
+              <div class="flex text-yellow-400 mt-1">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+              </div>
+            </div>
+          </div>
+          <p class="text-gray-300 relative z-10">
+            "Nirosha transformed my damaged hair into silky perfection! The keratin treatment was worth every penny. The salon has such a relaxing atmosphere and the staff made me feel so welcome."
+          </p>
+        </div>
+        
+        <!-- Testimonial 2 -->
+        <div class="testimonial-card relative rounded-xl p-8">
+          <div class="flex items-center mb-6">
+            <div class="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mr-4">
+              <span class="text-gray-400">SM</span>
+            </div>
+            <div>
+              <h4 class="text-lg font-bold">Samantha Mendis</h4>
+              <div class="flex text-yellow-400 mt-1">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+              </div>
+            </div>
+          </div>
+          <p class="text-gray-300 relative z-10">
+            "Kasuni did my wedding makeup and I've never felt more beautiful! She perfectly captured the look I wanted and it lasted all day. The bridal package was comprehensive and stress-free."
+          </p>
+        </div>
+        
+        <!-- Testimonial 3 -->
+        <div class="testimonial-card relative rounded-xl p-8">
+          <div class="flex items-center mb-6">
+            <div class="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mr-4">
+              <span class="text-gray-400">AM</span>
+            </div>
+            <div>
+              <h4 class="text-lg font-bold">Ayesha Mohamed</h4>
+              <div class="flex text-yellow-400 mt-1">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+              </div>
+            </div>
+          </div>
+          <p class="text-gray-300 relative z-10">
+            "Dilani's facial treatments have completely transformed my skin. After just 3 sessions, my acne scars have faded significantly. She's so knowledgeable and uses the best products."
+          </p>
+        </div>
+      </div>
+      
+      <div class="mt-16 text-center">
+        <div class="inline-flex space-x-2">
+          <button class="w-3 h-3 rounded-full bg-primary"></button>
+          <button class="w-3 h-3 rounded-full bg-gray-700"></button>
+          <button class="w-3 h-3 rounded-full bg-gray-700"></button>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- FAQ Section -->
+  <section id="faq" class="py-20 bg-gray-900">
+    <div class="container mx-auto px-6">
+      <div class="text-center mb-16">
+        <span class="text-primary font-semibold">NEED HELP?</span>
+        <h2 class="text-4xl md:text-5xl font-bold mt-2 mb-4">Frequently Asked Questions</h2>
+        <p class="text-xl text-gray-400 max-w-2xl mx-auto">Find answers to common questions about our salon and services.</p>
+        <div class="w-20 h-1 bg-primary mx-auto mt-6"></div>
+      </div>
+      
+      <div class="max-w-3xl mx-auto space-y-4">
+        <!-- FAQ Item 1 -->
+        <div class="accordion bg-gray-800 rounded-xl overflow-hidden border border-gray-700">
+          <button class="accordion-btn w-full flex justify-between items-center p-6 text-left">
+            <h3 class="text-lg font-medium">Do I need to make an appointment?</h3>
+            <i class="fas fa-chevron-down transition-transform duration-300"></i>
+          </button>
+          <div class="accordion-content">
+            <div class="px-6 pb-6 pt-0 text-gray-300">
+              <p>While we do accept walk-ins, we highly recommend making an appointment to ensure availability with your preferred stylist and to minimize waiting time. You can book online through our website, via WhatsApp, or by calling the salon directly.</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- FAQ Item 2 -->
+        <div class="accordion bg-gray-800 rounded-xl overflow-hidden border border-gray-700">
+          <button class="accordion-btn w-full flex justify-between items-center p-6 text-left">
+            <h3 class="text-lg font-medium">What safety measures do you have in place?</h3>
+            <i class="fas fa-chevron-down transition-transform duration-300"></i>
+          </button>
+          <div class="accordion-content">
+            <div class="px-6 pb-6 pt-0 text-gray-300">
+              <p>Your safety is our top priority. We follow strict hygiene protocols including:</p>
+              <ul class="list-disc pl-5 mt-2 space-y-1">
+                <li>Regular sanitization of all tools and surfaces</li>
+                <li>Use of disposable items where possible</li>
+                <li>Staff wearing masks and gloves during treatments</li>
+                <li>Temperature checks for all clients and staff</li>
+                <li>Limited capacity to ensure social distancing</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        
+        <!-- FAQ Item 3 -->
+        <div class="accordion bg-gray-800 rounded-xl overflow-hidden border border-gray-700">
+          <button class="accordion-btn w-full flex justify-between items-center p-6 text-left">
+            <h3 class="text-lg font-medium">What is your cancellation policy?</h3>
+            <i class="fas fa-chevron-down transition-transform duration-300"></i>
+          </button>
+          <div class="accordion-content">
+            <div class="px-6 pb-6 pt-0 text-gray-300">
+              <p>We require at least 24 hours notice for cancellations or rescheduling. Appointments canceled with less than 24 hours notice may be subject to a cancellation fee of 50% of the service cost. No-shows will be charged the full amount of the scheduled service.</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- FAQ Item 4 -->
+        <div class="accordion bg-gray-800 rounded-xl overflow-hidden border border-gray-700">
+          <button class="accordion-btn w-full flex justify-between items-center p-6 text-left">
+            <h3 class="text-lg font-medium">Do you offer bridal or special occasion packages?</h3>
+            <i class="fas fa-chevron-down transition-transform duration-300"></i>
+          </button>
+          <div class="accordion-content">
+            <div class="px-6 pb-6 pt-0 text-gray-300">
+              <p>Yes! We offer comprehensive bridal packages that include trial sessions, bridal makeup, hairstyling, and optional nail services. We also have special occasion packages for events like proms, engagements, and photoshoots. Contact us for a consultation to customize a package that fits your needs.</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- FAQ Item 5 -->
+        <div class="accordion bg-gray-800 rounded-xl overflow-hidden border border-gray-700">
+          <button class="accordion-btn w-full flex justify-between items-center p-6 text-left">
+            <h3 class="text-lg font-medium">What products do you use in the salon?</h3>
+            <i class="fas fa-chevron-down transition-transform duration-300"></i>
+          </button>
+          <div class="accordion-content">
+            <div class="px-6 pb-6 pt-0 text-gray-300">
+              <p>We use only premium professional-grade products from trusted brands like Olaplex, Kerastase, Wella, OPI, and Dermalogica. All our products are cruelty-free and many are vegan. Our stylists can recommend products for at-home maintenance that complement your salon treatments.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="text-center mt-16">
+        <p class="text-gray-400 mb-6">Still have questions? We're happy to help!</p>
+        <a href="#contact" class="inline-block border-2 border-primary text-primary hover:bg-primary hover:text-white px-8 py-3 rounded-full font-medium transition-all">
+          Contact Us
+        </a>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Booking Section -->
+  <section id="booking" class="py-20 bg-dark">
+    <div class="container mx-auto px-6">
+      <div class="flex flex-col lg:flex-row items-center gap-12">
+        <div class="lg:w-1/2">
+          <h2 class="text-4xl md:text-5xl font-bold mb-6">Book Your <span class="text-gradient">Appointment</span></h2>
+          <p class="text-xl text-gray-400 mb-8">Ready to experience the ADHI difference? Schedule your visit with our easy online booking system or contact us directly.</p>
+          
+          <div class="space-y-6">
+            <div class="flex items-start">
+              <div class="w-12 h-12 bg-primary bg-opacity-20 rounded-lg flex items-center justify-center mr-4">
+                <i class="fas fa-phone-alt text-primary"></i>
+              </div>
+              <div>
+                <h4 class="text-lg font-bold mb-1">Call Us</h4>
+                <p class="text-gray-400">+94 77 123 4567</p>
+                <p class="text-sm text-gray-500">Available 9AM - 7PM daily</p>
+              </div>
+            </div>
+            
+            <div class="flex items-start">
+              <div class="w-12 h-12 bg-primary bg-opacity-20 rounded-lg flex items-center justify-center mr-4">
+                <i class="fab fa-whatsapp text-primary"></i>
+              </div>
+              <div>
+                <h4 class="text-lg font-bold mb-1">WhatsApp</h4>
+                <p class="text-gray-400">+94 77 123 4567</p>
+                <p class="text-sm text-gray-500">Quick responses during business hours</p>
+              </div>
+            </div>
+            
+            <div class="flex items-start">
+              <div class="w-12 h-12 bg-primary bg-opacity-20 rounded-lg flex items-center justify-center mr-4">
+                <i class="fas fa-envelope text-primary"></i>
+              </div>
+              <div>
+                <h4 class="text-lg font-bold mb-1">Email</h4>
+                <p class="text-gray-400">contact@adhisalon.lk</p>
+                <p class="text-sm text-gray-500">Response within 24 hours</p>
+              </div>
+            </div>
+            
+            <div class="flex items-start">
+              <div class="w-12 h-12 bg-primary bg-opacity-20 rounded-lg flex items-center justify-center mr-4">
+                <i class="fas fa-map-marker-alt text-primary"></i>
+              </div>
+              <div>
+                <h4 class="text-lg font-bold mb-1">Visit Us</h4>
+                <p class="text-gray-400">No. 45, Beauty Street, Colombo</p>
+                <p class="text-sm text-gray-500">Open daily 9AM - 7PM</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="lg:w-1/2 w-full">
+          <div class="bg-glass rounded-2xl p-8 backdrop-blur-lg">
+            <h3 class="text-2xl font-bold mb-6">Book Online</h3>
+            <form class="booking-form space-y-4">
+              <div class="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-gray-300 mb-2">First Name</label>
+                  <input type="text" class="w-full px-4 py-3 rounded-lg bg-dark bg-opacity-50 border border-gray-700 focus:border-primary focus:outline-none" required>
+                </div>
+                <div>
+                  <label class="block text-gray-300 mb-2">Last Name</label>
+                  <input type="text" class="w-full px-4 py-3 rounded-lg bg-dark bg-opacity-50 border border-gray-700 focus:border-primary focus:outline-none" required>
+                </div>
+              </div>
+              
+              <div>
+                <label class="block text-gray-300 mb-2">Email</label>
+                <input type="email" class="w-full px-4 py-3 rounded-lg bg-dark bg-opacity-50 border border-gray-700 focus:border-primary focus:outline-none" required>
+              </div>
+              
+              <div>
+                <label class="block text-gray-300 mb-2">Phone Number</label>
+                <input type="tel" class="w-full px-4 py-3 rounded-lg bg-dark bg-opacity-50 border border-gray-700 focus:border-primary focus:outline-none" required>
+              </div>
+              
+              <div class="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-gray-300 mb-2">Service</label>
+                  <select class="w-full px-4 py-3 rounded-lg bg-dark bg-opacity-50 border border-gray-700 focus:border-primary focus:outline-none" required>
+                    <option value="">Select a service</option>
+                    <option>Haircut & Styling</option>
+                    <option>Hair Coloring</option>
+                    <option>Hair Treatments</option>
+                    <option>Bridal Makeup</option>
+                    <option>Special Occasion Makeup</option>
+                    <option>Facial Treatments</option>
+                    <option>Manicure & Pedicure</option>
+                    <option>Nail Extensions</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-gray-300 mb-2">Preferred Stylist</label>
+                  <select class="w-full px-4 py-3 rounded-lg bg-dark bg-opacity-50 border border-gray-700 focus:border-primary focus:outline-none">
+                    <option value="">No preference</option>
+                    <option>Nirosha (Senior Stylist)</option>
+                    <option>Dilani (Skin Specialist)</option>
+                    <option>Kasuni (Makeup Artist)</option>
+                    <option>Ruvini (Nail Technician)</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div class="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-gray-300 mb-2">Date</label>
+                  <input type="date" class="w-full px-4 py-3 rounded-lg bg-dark bg-opacity-50 border border-gray-700 focus:border-primary focus:outline-none" required>
+                </div>
+                <div>
+                  <label class="block text-gray-300 mb-2">Time</label>
+                  <select class="w-full px-4 py-3 rounded-lg bg-dark bg-opacity-50 border border-gray-700 focus:border-primary focus:outline-none" required>
+                    <option value="">Select time</option>
+                    <option>9:00 AM</option>
+                    <option>10:00 AM</option>
+                    <option>11:00 AM</option>
+                    <option>12:00 PM</option>
+                    <option>1:00 PM</option>
+                    <option>2:00 PM</option>
+                    <option>3:00 PM</option>
+                    <option>4:00 PM</option>
+                    <option>5:00 PM</option>
+                    <option>6:00 PM</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div>
+                <label class="block text-gray-300 mb-2">Special Requests</label>
+                <textarea class="w-full px-4 py-3 rounded-lg bg-dark bg-opacity-50 border border-gray-700 focus:border-primary focus:outline-none h-24"></textarea>
+              </div>
+              
+              <button type="submit" class="w-full bg-primary hover:bg-primary-dark text-white px-6 py-4 rounded-lg font-medium transition-all transform hover:scale-[1.02]">
+                Confirm Booking
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Contact Section -->
+  <section id="contact" class="py-20 bg-gray-900">
+    <div class="container mx-auto px-6">
+      <div class="text-center mb-16">
+        <span class="text-primary font-semibold">GET IN TOUCH</span>
+        <h2 class="text-4xl md:text-5xl font-bold mt-2 mb-4">Contact Us</h2>
+        <p class="text-xl text-gray-400 max-w-2xl mx-auto">We'd love to hear from you! Reach out with any questions or special requests.</p>
+        <div class="w-20 h-1 bg-primary mx-auto mt-6"></div>
+      </div>
+      
+      <div class="flex flex-col lg:flex-row gap-12">
+        <div class="lg:w-1/2">
+          <div class="bg-glass rounded-2xl p-8 backdrop-blur-lg h-full">
+            <h3 class="text-2xl font-bold mb-6">Send Us a Message</h3>
+            <form class="space-y-4">
+              <div class="grid md:grid-cols-2 gap-4">
+                <div>
+                  <input type="text" placeholder="Your Name" class="w-full px-4 py-3 rounded-lg bg-dark bg-opacity-50 border border-gray-700 focus:border-primary focus:outline-none" required>
+                </div>
+                <div>
+                  <input type="email" placeholder="Your Email" class="w-full px-4 py-3 rounded-lg bg-dark bg-opacity-50 border border-gray-700 focus:border-primary focus:outline-none" required>
+                </div>
+              </div>
+              
+              <div>
+                <input type="text" placeholder="Subject" class="w-full px-4 py-3 rounded-lg bg-dark bg-opacity-50 border border-gray-700 focus:border-primary focus:outline-none" required>
+              </div>
+              
+              <div>
+                <textarea placeholder="Your Message" class="w-full px-4 py-3 rounded-lg bg-dark bg-opacity-50 border border-gray-700 focus:border-primary focus:outline-none h-40" required></textarea>
+              </div>
+              
+              <button type="submit" class="bg-primary hover:bg-primary-dark text-white px-8 py-3 rounded-lg font-medium transition-all">
+                Send Message
+              </button>
+            </form>
+          </div>
+        </div>
+        
+        <div class="lg:w-1/2">
+          <div class="bg-glass rounded-2xl p-8 backdrop-blur-lg h-full">
+            <h3 class="text-2xl font-bold mb-6">Contact Information</h3>
+            
+            <div class="space-y-6">
+              <div class="flex items-start">
+                <div class="w-12 h-12 bg-primary bg-opacity-20 rounded-lg flex items-center justify-center mr-4">
+                  <i class="fas fa-map-marker-alt text-primary"></i>
+                </div>
+                <div>
+                  <h4 class="text-lg font-bold mb-1">Salon Address</h4>
+                  <p class="text-gray-400">No. 45, Beauty Street, Colombo</p>
+                  <a href="#" class="text-primary text-sm inline-flex items-center mt-1">
+                    View on map <i class="fas fa-arrow-right ml-1 text-xs"></i>
+                  </a>
+                </div>
+              </div>
+              
+              <div class="flex items-start">
+                <div class="w-12 h-12 bg-primary bg-opacity-20 rounded-lg flex items-center justify-center mr-4">
+                  <i class="fas fa-phone-alt text-primary"></i>
+                </div>
+                <div>
+                  <h4 class="text-lg font-bold mb-1">Phone Numbers</h4>
+                  <p class="text-gray-400">+94 77 123 4567 (Main)</p>
+                  <p class="text-gray-400">+94 77 765 4321 (Bridal)</p>
+                </div>
+              </div>
+              
+              <div class="flex items-start">
+                <div class="w-12 h-12 bg-primary bg-opacity-20 rounded-lg flex items-center justify-center mr-4">
+                  <i class="fas fa-envelope text-primary"></i>
+                </div>
+                <div>
+                  <h4 class="text-lg font-bold mb-1">Email Addresses</h4>
+                  <p class="text-gray-400">contact@adhisalon.lk (General)</p>
+                  <p class="text-gray-400">bookings@adhisalon.lk (Appointments)</p>
+                </div>
+              </div>
+              
+              <div class="flex items-start">
+                <div class="w-12 h-12 bg-primary bg-opacity-20 rounded-lg flex items-center justify-center mr-4">
+                  <i class="fas fa-clock text-primary"></i>
+                </div>
+                <div>
+                  <h4 class="text-lg font-bold mb-1">Working Hours</h4>
+                  <p class="text-gray-400">Monday - Saturday: 9:00 AM - 7:00 PM</p>
+                  <p class="text-gray-400">Sunday: 10:00 AM - 5:00 PM</p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="mt-8">
+              <h4 class="text-lg font-bold mb-4">Follow Us</h4>
+              <div class="flex space-x-4">
+                <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-primary transition-colors">
+                  <i class="fab fa-facebook-f"></i>
+                </a>
+                <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-primary transition-colors">
+                  <i class="fab fa-instagram"></i>
+                </a>
+                <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-primary transition-colors">
+                  <i class="fab fa-tiktok"></i>
+                </a>
+                <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-primary transition-colors">
+                  <i class="fab fa-youtube"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Newsletter Section -->
+  <section class="py-16 bg-primary">
+    <div class="container mx-auto px-6 text-center">
+      <h2 class="text-3xl md:text-4xl font-bold mb-4">Join Our Beauty Community</h2>
+      <p class="text-xl text-white opacity-90 max-w-2xl mx-auto mb-8">Subscribe to receive exclusive offers, beauty tips, and updates on new services.</p>
+      
+      <form class="max-w-md mx-auto flex">
+        <input type="email" placeholder="Your email address" class="flex-grow px-6 py-3 rounded-l-lg focus:outline-none text-dark" required>
+        <button type="submit" class="bg-dark text-white px-6 py-3 rounded-r-lg font-medium transition-all hover:bg-opacity-90">
+          Subscribe
+        </button>
+      </form>
+    </div>
+  </section>
+  
+  <!-- Footer -->
+  <footer class="bg-dark py-12">
+    <div class="container mx-auto px-6">
+      <div class="grid md:grid-cols-4 gap-8 mb-12">
+        <div>
+          <h3 class="text-xl font-bold mb-4 text-gradient">ADHI Salon</h3>
+          <p class="text-gray-400 mb-4">Elegance Redefined. Beauty Perfected.</p>
+          <div class="flex space-x-4">
+            <a href="#" class="text-gray-400 hover:text-primary transition-colors">
+              <i class="fab fa-facebook-f"></i>
+            </a>
+            <a href="#" class="text-gray-400 hover:text-primary transition-colors">
+              <i class="fab fa-instagram"></i>
+            </a>
+            <a href="#" class="text-gray-400 hover:text-primary transition-colors">
+              <i class="fab fa-tiktok"></i>
+            </a>
+            <a href="#" class="text-gray-400 hover:text-primary transition-colors">
+              <i class="fab fa-youtube"></i>
+            </a>
+          </div>
+        </div>
+        
+        <div>
+          <h3 class="text-lg font-bold mb-4 text-white">Quick Links</h3>
+          <ul class="space-y-2">
+            <li><a href="#home" class="text-gray-400 hover:text-primary transition-colors">Home</a></li>
+            <li><a href="#about" class="text-gray-400 hover:text-primary transition-colors">About Us</a></li>
+            <li><a href="#services" class="text-gray-400 hover:text-primary transition-colors">Services</a></li>
+            <li><a href="#team" class="text-gray-400 hover:text-primary transition-colors">Our Team</a></li>
+            <li><a href="#gallery" class="text-gray-400 hover:text-primary transition-colors">Gallery</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h3 class="text-lg font-bold mb-4 text-white">Services</h3>
+          <ul class="space-y-2">
+            <li><a href="#" class="text-gray-400 hover:text-primary transition-colors">Hair Styling</a></li>
+            <li><a href="#" class="text-gray-400 hover:text-primary transition-colors">Hair Coloring</a></li>
+            <li><a href="#" class="text-gray-400 hover:text-primary transition-colors">Bridal Makeup</a></li>
+            <li><a href="#" class="text-gray-400 hover:text-primary transition-colors">Skin Treatments</a></li>
+            <li><a href="#" class="text-gray-400 hover:text-primary transition-colors">Nail Care</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h3 class="text-lg font-bold mb-4 text-white">Contact</h3>
+          <ul class="space-y-2">
+            <li class="flex items-start">
+              <i class="fas fa-map-marker-alt text-primary mr-2 mt-1"></i>
+              <span class="text-gray-400">No. 45, Beauty Street, Colombo</span>
+            </li>
+            <li class="flex items-start">
+              <i class="fas fa-phone-alt text-primary mr-2 mt-1"></i>
+              <span class="text-gray-400">+94 77 123 4567</span>
+            </li>
+            <li class="flex items-start">
+              <i class="fas fa-envelope text-primary mr-2 mt-1"></i>
+              <span class="text-gray-400">contact@adhisalon.lk</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center">
+        <p class="text-gray-500 mb-4 md:mb-0">&copy; 2025 ADHI Salon. All rights reserved.</p>
+        <div class="flex space-x-6">
+          <a href="#" class="text-gray-500 hover:text-primary transition-colors">Privacy Policy</a>
+          <a href="#" class="text-gray-500 hover:text-primary transition-colors">Terms of Service</a>
+          <a href="#" class="text-gray-500 hover:text-primary transition-colors">Sitemap</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+  
+  <!-- WhatsApp Float Button -->
+  <a href="https://wa.me/94771234567" target="_blank" class="fixed bottom-6 right-6 bg-green-500 hover:bg-green-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-xl z-40 transition-all transform hover:scale-110">
+    <i class="fab fa-whatsapp text-2xl"></i>
+  </a>
+  
+  <!-- Back to Top Button -->
+  <button id="back-to-top" class="fixed bottom-6 right-24 bg-primary hover:bg-primary-dark text-white w-14 h-14 rounded-full flex items-center justify-center shadow-xl z-40 transition-all transform hover:scale-110 opacity-0 invisible">
+    <i class="fas fa-arrow-up"></i>
+  </button>
+  
+  <!-- JavaScript -->
+  <script>
+    // Preloader
+    window.addEventListener('load', function() {
+      const preloader = document.getElementById('preloader');
+      gsap.to(preloader, {
+        opacity: 0,
+        duration: 0.5,
+        onComplete: function() {
+          preloader.style.display = 'none';
+        }
+      });
+    });
+    
+    // Mobile Menu Toggle
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    
+    mobileMenuButton.addEventListener('click', function() {
+      mobileMenu.classList.toggle('hidden');
+    });
+    
+    // Close mobile menu when clicking a link
+    document.querySelectorAll('#mobile-menu a').forEach(link => {
+      link.addEventListener('click', function() {
+        mobileMenu.classList.add('hidden');
+      });
+    });
+    
+    // Smooth scrolling for navigation links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        const targetId = this.getAttribute('href');
+        const targetElement = document.querySelector(targetId);
+        
+        if (targetElement) {
+          window.scrollTo({
+            top: targetElement.offsetTop - 80,
+            behavior: 'smooth'
+          });
+        }
+      });
+    });
+    
+    // Navbar scroll effect
+    const navbar = document.getElementById('main-nav');
+    
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 100) {
+        navbar.classList.add('bg-dark', 'bg-opacity-90', 'shadow-lg');
+        navbar.classList.remove('bg-transparent');
+      } else {
+        navbar.classList.remove('bg-dark', 'bg-opacity-90', 'shadow-lg');
+        navbar.classList.add('bg-transparent');
+      }
+    });
+    
+    // Back to top button
+    const backToTopButton = document.getElementById('back-to-top');
+    
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 300) {
+        backToTopButton.classList.remove('opacity-0', 'invisible');
+        backToTopButton.classList.add('opacity-100', 'visible');
+      } else {
+        backToTopButton.classList.add('opacity-0', 'invisible');
+        backToTopButton.classList.remove('opacity-100', 'visible');
+      }
+    });
+    
+    backToTopButton.addEventListener('click', function() {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    });
+    
+    // Accordion functionality
+    document.querySelectorAll('.accordion-btn').forEach(button => {
+      button.addEventListener('click', function() {
+        const accordion = this.parentElement;
+        const content = this.nextElementSibling;
+        
+        accordion.classList.toggle('active');
+        
+        if (accordion.classList.contains('active')) {
+          this.querySelector('i').classList.add('rotate-180');
+        } else {
+          this.querySelector('i').classList.remove('rotate-180');
+        }
+      });
+    });
+    
+    // GSAP Animations
+    gsap.registerPlugin(ScrollTrigger);
+    
+    // Animate elements on scroll
+    gsap.utils.toArray('.fade-in').forEach(element => {
+      gsap.from(element, {
+        scrollTrigger: {
+          trigger: element,
+          start: "top 80%",
+          toggleActions: "play none none none"
+        },
+        opacity: 0,
+        y: 50,
+        duration: 1,
+        ease: "power3.out"
+      });
+    });
+    
+    // Animate service cards
+    gsap.utils.toArray('.service-card').forEach((card, i) => {
+      gsap.from(card, {
+        scrollTrigger: {
+          trigger: card,
+          start: "top 80%",
+          toggleActions: "play none none none"
+        },
+        opacity: 0,
+        y: 50,
+        duration: 0.8,
+        delay: i * 0.1,
+        ease: "power3.out"
+      });
+    });
+    
+    // Animate team cards
+    gsap.utils.toArray('.team-card').forEach((card, i) => {
+      gsap.from(card, {
+        scrollTrigger: {
+          trigger: card,
+          start: "top 80%",
+          toggleActions: "play none none none"
+        },
+        opacity: 0,
+        y: 50,
+        duration: 0.8,
+        delay: i * 0.1,
+        ease: "power3.out"
+      });
+    });
+    
+    // Cursor follower
+    const cursorFollower = document.querySelector('.cursor-follower');
+    
+    document.addEventListener('mousemove', function(e) {
+      gsap.to(cursorFollower, {
+        x: e.clientX,
+        y: e.clientY,
+        duration: 0.3,
+        ease: "power2.out"
+      });
+    });
+    
+    // Make cursor follower bigger on hover
+    document.querySelectorAll('a, button').forEach(element => {
+      element.addEventListener('mouseenter', function() {
+        gsap.to(cursorFollower, {
+          scale: 1.5,
+          duration: 0.3
+        });
+      });
+      
+      element.addEventListener('mouseleave', function() {
+        gsap.to(cursorFollower, {
+          scale: 1,
+          duration: 0.3
+        });
+      });
+    });
+    
+    // Three.js Background
+    const threejsBg = document.getElementById('threejs-bg');
+    
+    if (threejsBg) {
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+      const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      threejsBg.appendChild(renderer.domElement);
+      
+      // Create particles
+      const particlesGeometry = new THREE.BufferGeometry();
+      const particleCount = 1000;
+      
+      const posArray = new Float32Array(particleCount * 3);
+      
+      for (let i = 0; i < particleCount * 3; i++) {
+        posArray[i] = (Math.random() - 0.5) * 10;
+      }
+      
+      particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+      
+      const particlesMaterial = new THREE.PointsMaterial({
+        size: 0.02,
+        color: 0xff4d6d,
+        transparent: true,
+        opacity: 0.8,
+        blending: THREE.AdditiveBlending
+      });
+      
+      const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+      scene.add(particlesMesh);
+      
+      camera.position.z = 3;
+      
+      // Animation
+      function animate() {
+        requestAnimationFrame(animate);
+        
+        particlesMesh.rotation.x += 0.0005;
+        particlesMesh.rotation.y += 0.0005;
+        
+        renderer.render(scene, camera);
+      }
+      
+      animate();
+      
+      // Handle resize
+      window.addEventListener('resize', function() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+    }
+    
+    // p5.js Particles
+    const p5Particles = document.getElementById('p5-particles');
+    
+    if (p5Particles) {
+      const particleSketch = function(p) {
+        let particles = [];
+        
+        p.setup = function() {
+          p.createCanvas(window.innerWidth, window.innerHeight);
+          
+          // Create particles
+          for (let i = 0; i < 50; i++) {
+            particles.push({
+              x: p.random(p.width),
+              y: p.random(p.height),
+              size: p.random(5, 20),
+              speed: p.random(0.5, 2),
+              color: p.color(255, 77, 109, p.random(50, 150))
+            });
+          }
+        };
+        
+        p.draw = function() {
+          p.clear();
+          
+          // Update and draw particles
+          for (let i = 0; i < particles.length; i++) {
+            let particle = particles[i];
+            
+            // Update position
+            particle.y -= particle.speed;
+            if (particle.y < -particle.size) {
+              particle.y = p.height + particle.size;
+              particle.x = p.random(p.width);
+            }
+            
+            // Draw particle
+            p.noStroke();
+            p.fill(particle.color);
+            p.ellipse(particle.x, particle.y, particle.size);
+          }
+        };
+        
+        p.windowResized = function() {
+          p.resizeCanvas(window.innerWidth, window.innerHeight);
+        };
+      };
+      
+      new p5(particleSketch, 'p5-particles');
+    }
+  </script>
+</body>
+</html>
